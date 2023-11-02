@@ -8,6 +8,7 @@ import android.location.LocationManager
 import android.location.LocationRequest
 import android.os.Build
 import android.os.Looper
+import com.example.locationupdatesexample.Constants.LOCATION_UPDATES_INTERVAL
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
@@ -25,8 +26,8 @@ class DefaultLocationClient constructor(
     override fun getLocationUpdates(interval: Long): Flow<Location> {
         return callbackFlow<Location> {
 
-            if (context.hasLocationPermission()) {
-                throw LocationClient.LocationException("Missiong location permissions")
+            if (!context.hasLocationPermission()) {
+                throw LocationClient.LocationException("Missing location permissions")
             }
 
             val locationManger = context.getSystemService(LOCATION_SERVICE) as LocationManager
@@ -36,10 +37,10 @@ class DefaultLocationClient constructor(
                 throw LocationClient.LocationException("Missing Provider")
             }
 
-
             val locationRequest =
-                com.google.android.gms.location.LocationRequest.create().setInterval(10000)
-                    .setFastestInterval(10000)
+                com.google.android.gms.location.LocationRequest.create()
+                    .setInterval(LOCATION_UPDATES_INTERVAL)
+                    .setFastestInterval(LOCATION_UPDATES_INTERVAL)
 
             val locationCallback = object : LocationCallback() {
                 override fun onLocationResult(result: LocationResult) {
@@ -49,7 +50,13 @@ class DefaultLocationClient constructor(
                     }
                 }
             }
-            client.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+
+            client.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+
             awaitClose {
                 client.removeLocationUpdates(locationCallback)
             }
