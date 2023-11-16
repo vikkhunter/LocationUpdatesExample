@@ -4,9 +4,12 @@ import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import com.example.locationupdatesexample.Constants.LOCATION_UPDATES_INTERVAL
 import com.example.locationupdatesexample.Constants.NOTIFICATION_CHANNEL_ID
 import com.example.locationupdatesexample.Constants.START
@@ -80,6 +83,8 @@ class LocationService : Service() {
                     notification.setContentText("Location: $lat,$long").build()
                 notificationManger.notify(1, updatedNotification)
             }.launchIn(serviceScope)
+
+        ServiceCompat.startForeground(this, 1, notification.build(), FOREGROUND_SERVICE_TYPE_LOCATION)
     }
 
     override fun onDestroy() {
